@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./public/images/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Meta Tags -->
+    <title>SPL Shield - Complete Solana Security Ecosystem</title>
+    <meta name="description" content="Advanced AI-powered token scanning, risk analysis, and secure trading for Solana DeFi. Protect your investments with SPL Shield's comprehensive security suite." />
+    <meta name="keywords" content="solana security, defi protection, token scanner, risk analysis, crypto safety, spl token, blockchain security" />
+    <meta name="author" content="SPL Shield Team" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://splshield.com/" />
+    <meta property="og:title" content="SPL Shield - Complete Solana Security Ecosystem" />
+    <meta property="og:description" content="Advanced AI-powered token scanning, risk analysis, and secure trading for Solana DeFi." />
+    <meta property="og:image" content="https://splshield.com/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://splshield.com/" />
+    <meta property="twitter:title" content="SPL Shield - Complete Solana Security Ecosystem" />
+    <meta property="twitter:description" content="Advanced AI-powered token scanning, risk analysis, and secure trading for Solana DeFi." />
+    <meta property="twitter:image" content="https://splshield.com/og-image.png" />
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./public/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="./public/images/site.webmanifest">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#22c55e" />
+    
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <script>
+      // Check for saved theme preference or default to 'light' mode
+      const theme = localStorage.getItem('spl-shield-theme') || 
+                   (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #22c55e 0%, #0d9488 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    ">
+      <div style="text-align: center; color: white;">
+        <div style="
+          width: 60px;
+          height: 60px;
+          border: 3px solid rgba(255,255,255,0.3);
+          border-top: 3px solid white;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 20px;
+        "></div>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; margin: 0;">SPL Shield</h2>
+        <p style="font-family: 'Inter', sans-serif; margin: 5px 0 0; opacity: 0.8;">Loading Security Dashboard...</p>
+      </div>
+    </div>
+
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+
+    <!-- React App Root -->
+    <div id="root"></div>
+    
+    <!-- Hide loading screen when React loads -->
+    <script>
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 1000);
+      });
+    </script>
+    
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.nyc_output
+coverage
+.vscode
+.idea
+*.log
+logs
+dist
+build
+.DS_Store
+Thumbs.db
+
+# Development files
+*.md
+LICENSE
+.github
+docs
+.eslintrc.js
+.prettierrc
+tailwind.config.js.backup
+vite.config.js.backup
+
+# Deployment files
+deploy.sh
+monitor.sh
+docker-compose.override.yml

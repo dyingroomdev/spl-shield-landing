@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  spl-shield-web:
+    build: .
+    container_name: spl-shield-landing
+    restart: unless-stopped
+    ports:
+      - "3001:80"  # Map container port 80 to host port 3001
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./logs:/var/log/nginx  # Mount logs directory
+    networks:
+      - spl-shield-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  spl-shield-network:
+    driver: bridge
+
+# Optional: Add a volume for persistent logs
+volumes:
+  nginx-logs:
+    driver: local
