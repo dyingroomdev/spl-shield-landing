@@ -1,61 +1,38 @@
 version: '3.8'
 
 services:
-  spl-shield-app:
+  spl-shield-web:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spl-shield-frontend
+    container_name: spl-shield-landing
+    ports:
+      - "3000:80"
     restart: unless-stopped
-    
-    # Internal network - not exposed to host
-    networks:
-      - spl-shield-network
-    
-    # Environment variables
     environment:
       - NODE_ENV=production
       - VITE_SITE_URL=https://splshield.com
-      - VITE_SCANNER_URL=https://app.splshield.com  
+      - VITE_SCANNER_URL=https://app.splshield.com
       - VITE_EXCHANGE_URL=https://ex.splshield.com
-    
-    # Health check
+    networks:
+      - spl-shield-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    
-    # Resource limits
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-    
-    # Logging
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    
-    # Labels for Portainer
     labels:
-      - "traefik.enable=false"
-      - "com.docker.compose.project=spl-shield"
-      - "com.docker.compose.service=frontend"
+      - "traefik.enable=false"  # Since we're using external nginx
+      - "com.spl-shield.service=web"
+      - "com.spl-shield.version=1.0.0"
 
 networks:
   spl-shield-network:
     driver: bridge
     name: spl-shield-network
 
-# Optional: Add volumes for persistence if needed
+# Optional: Add volumes for logs
 volumes:
-  spl-shield-data:
-    name: spl-shield-data
+  nginx-logs:
+    driver: local

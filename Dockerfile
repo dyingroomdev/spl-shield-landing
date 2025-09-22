@@ -1,4 +1,4 @@
-# Multi-stage build for SPL Shield React App
+# SPL Shield Landing Website Dockerfile
 FROM node:18-alpine AS builder
 
 # Set working directory
@@ -13,20 +13,13 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Set build environment variables
-ENV NODE_ENV=production
-ENV GENERATE_SOURCEMAP=false
-
 # Build the application
 RUN npm run build
 
-# Production stage with Nginx
+# Production stage
 FROM nginx:alpine
 
-# Remove default nginx website
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy built app from builder stage
+# Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy custom nginx configuration
@@ -34,12 +27,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
-
-# Expose port
+# Expose port 80
 EXPOSE 80
 
 # Start nginx
