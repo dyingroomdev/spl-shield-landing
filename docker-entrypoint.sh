@@ -32,16 +32,16 @@ else
 fi
 
 # Create necessary directories with proper permissions
-mkdir -p /var/cache/nginx/client_temp
-mkdir -p /var/cache/nginx/proxy_temp
-mkdir -p /var/cache/nginx/fastcgi_temp
-mkdir -p /var/cache/nginx/uwsgi_temp
-mkdir -p /var/cache/nginx/scgi_temp
+mkdir -p /var/cache/nginx/client_temp \
+         /var/cache/nginx/proxy_temp \
+         /var/cache/nginx/fastcgi_temp \
+         /var/cache/nginx/uwsgi_temp \
+         /var/cache/nginx/scgi_temp 2>/dev/null || true
 
 # Set proper permissions (only if running as root, otherwise skip)
 if [ "$(id -u)" = "0" ]; then
-    chown -R nginx:nginx /var/cache/nginx/
-    chown -R nginx:nginx /var/log/nginx/
+    chown -R nginx:nginx /var/cache/nginx/ 2>/dev/null || true
+    chown -R nginx:nginx /var/log/nginx/ 2>/dev/null || true
 fi
 
 # Display container information
