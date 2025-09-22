@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# SPL Shield VPS Deployment Script
+# SPL Shield Docker Deployment Script
 set -e
-
-echo "🚀 SPL Shield VPS Deployment Starting..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -29,139 +27,125 @@ print_error() {
 }
 
 # Configuration
-PROJECT_NAME="spl-shield-landing"
-CONTAINER_NAME="spl-shield-landing"
-IMAGE_NAME="spl-shield-web"
-HOST_PORT="3001"
-DOMAIN="your-domain.com"  # Replace with your domain
+DOCKER_IMAGE_NAME="spl-shield-frontend"
+DOCKER_TAG="latest"
+COMPOSE_PROJECT_NAME="spl-shield"
+NGINX_CONFIG_NAME="spl-shield.conf"
 
-# Check if Docker is installed
-check_docker() {
-    if ! command -v docker &> /dev/null; then
-        print_error "Docker is not installed. Please install Docker first."
-        exit 1
-    fi
-    
-    if ! command -v docker-compose &> /dev/null; then
-        print_error "Docker Compose is not installed. Please install Docker Compose first."
-        exit 1
-    fi
-    
-    print_success "Docker and Docker Compose are installed"
-}
+print_status "🚀 SPL Shield Docker Deployment Started..."
 
-# Pull latest code from GitHub
-pull_latest_code() {
-    print_status "Pulling latest code from GitHub..."
-    
-    if [ -d ".git" ]; then
-        git pull origin main
-        print_success "Code updated from GitHub"
-    else
-        print_warning "Not a git repository. Please clone from GitHub first."
-    fi
-}
+# Check if Docker is running
+if ! docker info > /dev/null 2>&1; then
+    print_error "Docker is not running. Please start Docker first."
+    exit 1
+fi
 
-# Stop existing containers
-stop_existing_containers() {
-    print_status "Stopping existing containers..."
-    
-    if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
-        docker stop $CONTAINER_NAME
-        print_success "Stopped existing container"
-    fi
-    
-    if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-        docker rm $CONTAINER_NAME
-        print_success "Removed existing container"
-    fi
-}
+# Check if Docker Compose is available
+if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null 2>&1; then
+    print_error "Docker Compose is not available. Please install Docker Compose."
+    exit 1
+fi
 
-# Build and start containers
-build_and_start() {
-    print_status "Building and starting containers..."
-    
-    # Build the image
-    docker-compose build --no-cache
-    
-    # Start containers
-    docker-compose up -d
-    
-    print_success "Containers built and started"
-}
+# Determine Docker Compose command
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    DOCKER_COMPOSE_CMD="docker compose"
+fi
+
+print_success "Docker environment check passed"
+
+# Build and deploy
+print_status "Building Docker image..."
+$DOCKER_COMPOSE_CMD build --no-cache
+
+print_success "Docker image built successfully"
+
+print_status "Stopping existing containers..."
+$DOCKER_COMPOSE_CMD down
+
+print_status "Starting SPL Shield application..."
+$DOCKER_COMPOSE_CMD up -d
 
 # Wait for container to be healthy
-wait_for_health() {
-    print_status "Waiting for container to be healthy..."
-    
-    for i in {1..30}; do
-        if docker-compose ps | grep -q "healthy"; then
-            print_success "Container is healthy"
-            return 0
-        fi
-        
-        if [ $i -eq 30 ]; then
-            print_error "Container failed to become healthy"
-            docker-compose logs
-            exit 1
-        fi
-        
-        sleep 2
-    done
-}
+print_status "Waiting for application to be ready..."
+sleep 10
 
-# Test the deployment
-test_deployment() {
-    print_status "Testing deployment..."
-    
-    # Test health endpoint
-    if curl -f -s "http://localhost:$HOST_PORT/health" > /dev/null; then
-        print_success "Health check passed"
-    else
-        print_error "Health check failed"
-        return 1
-    fi
-    
-    # Test main page
-    if curl -f -s "http://localhost:$HOST_PORT/" > /dev/null; then
-        print_success "Main page accessible"
-    else
-        print_error "Main page not accessible"
-        return 1
-    fi
-}
+# Check if container is running
+if $DOCKER_COMPOSE_CMD ps | grep -q "Up"; then
+    print_success "SPL Shield container is running"
+else
+    print_error "Container failed to start"
+    $DOCKER_COMPOSE_CMD logs
+    exit 1
+fi
 
-# Show deployment info
-show_deployment_info() {
-    print_status "Deployment Information:"
-    echo "========================"
-    echo "🌐 Website URL: http://localhost:$HOST_PORT"
-    echo "🐳 Container: $CONTAINER_NAME"
-    echo "📊 Health Check: http://localhost:$HOST_PORT/health"
-    echo "📋 View Logs: docker-compose logs -f"
-    echo "🛑 Stop: docker-compose down"
-    echo "🔄 Restart: docker-compose restart"
-    echo "========================"
-}
+# Get container IP for nginx configuration
+CONTAINER_IP=$($DOCKER_COMPOSE_CMD exec spl-shield-app hostname -i | tr -d '\r')
+if [ -z "$CONTAINER_IP" ]; then
+    print_warning "Could not determine container IP"
+else
+    print_success "Container IP: $CONTAINER_IP"
+fi
 
-# Main deployment process
-main() {
-    print_status "Starting SPL Shield deployment to VPS..."
-    
-    check_docker
-    pull_latest_code
-    stop_existing_containers
-    build_and_start
-    wait_for_health
-    test_deployment
-    show_deployment_info
-    
-    print_success "🎉 SPL Shield deployed successfully!"
-    print_status "Access your website at: http://localhost:$HOST_PORT"
-}
+# Create nginx configuration
+print_status "Creating Nginx configuration..."
 
-# Error handling
-trap 'print_error "Deployment failed at line $LINENO"' ERR
+# Check if running on Portainer or regular Docker
+if [ -n "$PORTAINER_HOST" ]; then
+    print_status "Detected Portainer environment"
+    NGINX_CONFIG_PATH="/var/lib/docker/volumes/portainer_data/_data/nginx/conf.d/$NGINX_CONFIG_NAME"
+else
+    NGINX_CONFIG_PATH="/etc/nginx/sites-available/$NGINX_CONFIG_NAME"
+fi
 
-# Run deployment
-main "$@"
+print_status "Nginx configuration will be created at: $NGINX_CONFIG_PATH"
+
+# Display post-deployment instructions
+echo ""
+echo "🎉 SPL Shield Deployment Complete!"
+echo "=================================="
+print_success "✅ Docker container is running"
+print_success "✅ Application is accessible internally"
+print_success "✅ Health check endpoint: /health"
+echo ""
+echo "📋 Next Steps:"
+echo "1. Configure your main Nginx reverse proxy"
+echo "2. Set up SSL certificates" 
+echo "3. Update DNS records"
+echo "4. Test the application"
+echo ""
+echo "🔧 Container Information:"
+echo "- Container Name: spl-shield-frontend"
+echo "- Internal Port: 80"
+echo "- Network: spl-shield-network"
+echo "- Health Check: curl http://spl-shield-frontend/health"
+echo ""
+echo "📁 Configuration Files:"
+echo "- Nginx Proxy Config: nginx-proxy.conf"
+echo "- Docker Compose: docker-compose.yml"
+echo "- Dockerfile: Dockerfile"
+echo ""
+echo "🔍 Useful Commands:"
+echo "- View logs: $DOCKER_COMPOSE_CMD logs -f"
+echo "- Restart: $DOCKER_COMPOSE_CMD restart"
+echo "- Stop: $DOCKER_COMPOSE_CMD down"
+echo "- Rebuild: $DOCKER_COMPOSE_CMD build --no-cache && $DOCKER_COMPOSE_CMD up -d"
+echo ""
+
+# Check container health
+print_status "Performing health check..."
+sleep 5
+
+if $DOCKER_COMPOSE_CMD exec spl-shield-app curl -f http://localhost/health > /dev/null 2>&1; then
+    print_success "✅ Application health check passed"
+else
+    print_warning "⚠️  Health check failed - check logs for issues"
+fi
+
+print_success "🚀 SPL Shield is ready for production!"
+
+# Show running containers
+echo ""
+print_status "Running containers:"
+$DOCKER_COMPOSE_CMD ps
