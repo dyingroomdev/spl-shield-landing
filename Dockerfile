@@ -1,4 +1,7 @@
 # SPL Shield Landing Website Dockerfile
+# Multi-stage build for optimized production image
+
+# Build stage
 FROM node:18-alpine AS builder
 
 # Set working directory
@@ -13,24 +16,51 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Set production environment variables
+ENV NODE_ENV=production
+ENV VITE_SITE_URL=https://splshield.com
+ENV VITE_SCANNER_URL=https://app.splshield.com
+ENV VITE_EXCHANGE_URL=https://ex.splshield.com
+
 # Build the application
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM nginx:alpine AS production
 
-# Copy built assets from builder stage
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy startup script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Add healthcheck
+# Create nginx user and set permissions
+RUN addgroup -g 1001 -S nginx && \
+    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d
+
+# Switch to non-root user
+USER nginx
+
+# Expose port 3000 (internal container port)
+EXPOSE 3000
+
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+  CMD curl -f http://localhost:3000/ || exit 1
 
-# Expose port 80
-EXPOSE 80
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
 # Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/docker-entrypoint.sh"]

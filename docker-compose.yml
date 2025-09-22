@@ -5,34 +5,72 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: production
     container_name: spl-shield-landing
-    ports:
-      - "3000:80"
     restart: unless-stopped
+    
+    # Port mapping - expose 3000 to host
+    ports:
+      - "3000:3000"
+    
+    # Environment variables
     environment:
       - NODE_ENV=production
-      - VITE_SITE_URL=https://splshield.com
-      - VITE_SCANNER_URL=https://app.splshield.com
-      - VITE_EXCHANGE_URL=https://ex.splshield.com
-    networks:
-      - spl-shield-network
+      - NGINX_PORT=3000
+      - NGINX_HOST=0.0.0.0
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    # Health check
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Labels for Portainer
     labels:
-      - "traefik.enable=false"  # Since we're using external nginx
-      - "com.spl-shield.service=web"
-      - "com.spl-shield.version=1.0.0"
+      - "traefik.enable=false"
+      - "com.docker.compose.service=spl-shield-web"
+      - "description=SPL Shield Landing Website"
+      - "maintainer=SPL Shield Team"
+      - "version=1.0.0"
+    
+    # Networks
+    networks:
+      - spl-shield-network
+      - proxy-network  # Connect to your existing nginx network
 
+# Networks
 networks:
   spl-shield-network:
     driver: bridge
-    name: spl-shield-network
+    labels:
+      - "description=SPL Shield internal network"
+  
+  proxy-network:
+    external: true
+    name: proxy-network  # Adjust this to match your existing nginx network name
 
-# Optional: Add volumes for logs
+# Volumes (for potential future use)
 volumes:
-  nginx-logs:
+  spl-shield-logs:
     driver: local
+    labels:
+      - "description=SPL Shield application logs"

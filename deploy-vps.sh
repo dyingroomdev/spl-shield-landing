@@ -3,14 +3,18 @@
 # SPL Shield Docker Deployment Script
 set -e
 
-echo "🚀 SPL Shield Docker Deployment Starting..."
-
-# Colors
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+
+# Configuration
+IMAGE_NAME="spl-shield-landing"
+CONTAINER_NAME="spl-shield-landing"
+HOST_PORT="3000"
+CONTAINER_PORT="3000"
 
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -28,223 +32,238 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Configuration
-APP_NAME="spl-shield-landing"
-CONTAINER_NAME="spl-shield-landing"
-IMAGE_NAME="spl-shield/landing"
-PORT="3000"
-
 # Check if Docker is running
 check_docker() {
-    print_status "Checking Docker installation..."
-    if ! command -v docker &> /dev/null; then
-        print_error "Docker is not installed"
+    print_status "Checking Docker..."
+    if ! docker info > /dev/null 2>&1; then
+        print_error "Docker is not running. Please start Docker first."
         exit 1
     fi
-
-    if ! docker info &> /dev/null; then
-        print_error "Docker is not running"
-        exit 1
-    fi
-
     print_success "Docker is running"
 }
 
-# Check if port 3000 is available
-check_port() {
-    print_status "Checking if port $PORT is available..."
-    if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null ; then
-        print_warning "Port $PORT is already in use"
-        read -p "Do you want to stop the existing container? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            docker stop $CONTAINER_NAME 2>/dev/null || true
-            docker rm $CONTAINER_NAME 2>/dev/null || true
-            print_success "Existing container stopped"
-        else
-            print_error "Cannot deploy - port $PORT is in use"
+# Check if required files exist
+check_files() {
+    print_status "Checking required files..."
+    
+    required_files=("Dockerfile" "nginx.conf" "docker-entrypoint.sh" "docker-compose.yml" "package.json")
+    
+    for file in "${required_files[@]}"; do
+        if [ ! -f "$file" ]; then
+            print_error "Required file missing: $file"
             exit 1
         fi
-    fi
-}
-
-# Build the Docker image
-build_image() {
-    print_status "Building Docker image..."
-    
-    # Check if Dockerfile exists
-    if [ ! -f "Dockerfile" ]; then
-        print_error "Dockerfile not found in current directory"
-        exit 1
-    fi
-
-    # Check if nginx.conf exists
-    if [ ! -f "nginx.conf" ]; then
-        print_error "nginx.conf not found in current directory"
-        exit 1
-    fi
-
-    # Build the image
-    docker build -t $IMAGE_NAME:latest . --no-cache
-
-    print_success "Docker image built successfully"
-}
-
-# Deploy with Docker Compose
-deploy_with_compose() {
-    print_status "Deploying with Docker Compose..."
-    
-    if [ ! -f "docker-compose.yml" ]; then
-        print_error "docker-compose.yml not found"
-        exit 1
-    fi
-
-    # Stop existing containers
-    docker-compose down 2>/dev/null || true
-
-    # Start new containers
-    docker-compose up -d
-
-    print_success "Application deployed with Docker Compose"
-}
-
-# Deploy with Docker run (alternative)
-deploy_with_docker() {
-    print_status "Deploying with Docker run..."
-    
-    # Remove existing container if it exists
-    docker stop $CONTAINER_NAME 2>/dev/null || true
-    docker rm $CONTAINER_NAME 2>/dev/null || true
-
-    # Run new container
-    docker run -d \
-        --name $CONTAINER_NAME \
-        --restart unless-stopped \
-        -p $PORT:80 \
-        -e NODE_ENV=production \
-        -e VITE_SITE_URL=https://splshield.com \
-        -e VITE_SCANNER_URL=https://app.splshield.com \
-        -e VITE_EXCHANGE_URL=https://ex.splshield.com \
-        $IMAGE_NAME:latest
-
-    print_success "Container deployed successfully"
-}
-
-# Check deployment health
-check_deployment() {
-    print_status "Checking deployment health..."
-    
-    # Wait for container to start
-    sleep 10
-
-    # Check if container is running
-    if ! docker ps | grep -q $CONTAINER_NAME; then
-        print_error "Container is not running"
-        docker logs $CONTAINER_NAME
-        exit 1
-    fi
-
-    # Check if app is responding
-    for i in {1..30}; do
-        if curl -f -s http://localhost:$PORT/health > /dev/null; then
-            print_success "Application is healthy and responding"
-            return 0
-        fi
-        print_status "Waiting for application to start... ($i/30)"
-        sleep 2
     done
-
-    print_error "Application failed to start or is not responding"
-    docker logs $CONTAINER_NAME
-    exit 1
+    
+    print_success "All required files found"
 }
 
-# Update Nginx configuration
-update_nginx() {
-    print_status "Nginx configuration update needed..."
-    print_warning "Please update your host Nginx configuration:"
-    echo ""
-    echo "1. Copy the splshield.conf to your Nginx config directory:"
-    echo "   sudo cp splshield.conf /etc/nginx/sites-available/"
-    echo "   sudo ln -s /etc/nginx/sites-available/splshield.conf /etc/nginx/sites-enabled/"
-    echo ""
-    echo "2. Update SSL certificate paths in the config file"
-    echo ""
-    echo "3. Test and reload Nginx:"
-    echo "   sudo nginx -t"
-    echo "   sudo systemctl reload nginx"
-    echo ""
-}
-
-# Cleanup old images
-cleanup() {
-    print_status "Cleaning up old Docker images..."
-    docker image prune -f
+# Stop and remove existing container
+cleanup_existing() {
+    print_status "Cleaning up existing containers..."
+    
+    if docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
+        print_warning "Stopping existing container: ${CONTAINER_NAME}"
+        docker stop "$CONTAINER_NAME" || true
+        docker rm "$CONTAINER_NAME" || true
+    fi
+    
     print_success "Cleanup completed"
+}
+
+# Build Docker image
+build_image() {
+    print_status "Building Docker image: ${IMAGE_NAME}"
+    
+    docker build \
+        --target production \
+        --tag "${IMAGE_NAME}:latest" \
+        --tag "${IMAGE_NAME}:$(date +%Y%m%d_%H%M%S)" \
+        .
+    
+    if [ $? -eq 0 ]; then
+        print_success "Docker image built successfully"
+    else
+        print_error "Failed to build Docker image"
+        exit 1
+    fi
+}
+
+# Run container
+run_container() {
+    print_status "Starting container: ${CONTAINER_NAME}"
+    
+    docker run -d \
+        --name "$CONTAINER_NAME" \
+        --restart unless-stopped \
+        -p "${HOST_PORT}:${CONTAINER_PORT}" \
+        --health-cmd="curl -f http://localhost:${CONTAINER_PORT}/health || exit 1" \
+        --health-interval=30s \
+        --health-timeout=10s \
+        --health-retries=3 \
+        --health-start-period=40s \
+        --label "description=SPL Shield Landing Website" \
+        --label "version=1.0.0" \
+        "$IMAGE_NAME:latest"
+    
+    if [ $? -eq 0 ]; then
+        print_success "Container started successfully"
+    else
+        print_error "Failed to start container"
+        exit 1
+    fi
+}
+
+# Deploy using docker-compose
+deploy_compose() {
+    print_status "Deploying with docker-compose..."
+    
+    # Stop existing services
+    docker-compose down --remove-orphans || true
+    
+    # Build and start services
+    docker-compose up -d --build
+    
+    if [ $? -eq 0 ]; then
+        print_success "Docker Compose deployment completed"
+    else
+        print_error "Docker Compose deployment failed"
+        exit 1
+    fi
+}
+
+# Wait for container to be healthy
+wait_for_health() {
+    print_status "Waiting for container to be healthy..."
+    
+    local max_attempts=30
+    local attempt=1
+    
+    while [ $attempt -le $max_attempts ]; do
+        health_status=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2>/dev/null || echo "no-container")
+        
+        case $health_status in
+            "healthy")
+                print_success "Container is healthy!"
+                return 0
+                ;;
+            "unhealthy")
+                print_error "Container is unhealthy"
+                docker logs "$CONTAINER_NAME" --tail=20
+                return 1
+                ;;
+            "starting")
+                print_status "Container is starting... (attempt $attempt/$max_attempts)"
+                ;;
+            "no-container")
+                print_error "Container not found"
+                return 1
+                ;;
+        esac
+        
+        sleep 5
+        attempt=$((attempt + 1))
+    done
+    
+    print_error "Container failed to become healthy within timeout"
+    return 1
+}
+
+# Test the deployment
+test_deployment() {
+    print_status "Testing deployment..."
+    
+    # Test health endpoint
+    if curl -f -s "http://localhost:${HOST_PORT}/health" > /dev/null; then
+        print_success "Health check passed"
+    else
+        print_error "Health check failed"
+        return 1
+    fi
+    
+    # Test main page
+    if curl -f -s "http://localhost:${HOST_PORT}/" > /dev/null; then
+        print_success "Main page accessible"
+    else
+        print_error "Main page not accessible"
+        return 1
+    fi
+    
+    print_success "All tests passed!"
+}
+
+# Show deployment info
+show_info() {
+    echo
+    print_success "🎉 SPL Shield deployment completed!"
+    echo
+    echo -e "${BLUE}📊 Deployment Information:${NC}"
+    echo -e "  ${YELLOW}Container Name:${NC} $CONTAINER_NAME"
+    echo -e "  ${YELLOW}Image:${NC} $IMAGE_NAME:latest"
+    echo -e "  ${YELLOW}Host Port:${NC} $HOST_PORT"
+    echo -e "  ${YELLOW}Container Port:${NC} $CONTAINER_PORT"
+    echo
+    echo -e "${BLUE}🌐 Access URLs:${NC}"
+    echo -e "  ${YELLOW}Local:${NC} http://localhost:$HOST_PORT"
+    echo -e "  ${YELLOW}Network:${NC} http://$(hostname -I | awk '{print $1}'):$HOST_PORT"
+    echo -e "  ${YELLOW}Health Check:${NC} http://localhost:$HOST_PORT/health"
+    echo
+    echo -e "${BLUE}🔧 Management Commands:${NC}"
+    echo -e "  ${YELLOW}View logs:${NC} docker logs $CONTAINER_NAME -f"
+    echo -e "  ${YELLOW}Stop container:${NC} docker stop $CONTAINER_NAME"
+    echo -e "  ${YELLOW}Restart container:${NC} docker restart $CONTAINER_NAME"
+    echo -e "  ${YELLOW}Remove container:${NC} docker rm -f $CONTAINER_NAME"
+    echo
+    echo -e "${GREEN}✅ Ready for nginx proxy configuration!${NC}"
 }
 
 # Main deployment function
 main() {
-    echo "🛡️  SPL Shield Docker Deployment"
-    echo "=================================="
-    echo "App: $APP_NAME"
-    echo "Port: $PORT"
-    echo "Container: $CONTAINER_NAME"
-    echo "=================================="
-    echo
-
-    check_docker
-    check_port
-    build_image
+    echo -e "${GREEN}🛡️  SPL Shield Docker Deployment${NC}"
+    echo "======================================"
     
-    # Choose deployment method
-    if [ -f "docker-compose.yml" ]; then
-        deploy_with_compose
-    else
-        deploy_with_docker
-    fi
+    # Deployment method selection
+    METHOD=${1:-"compose"}
     
-    check_deployment
-    update_nginx
-    cleanup
-
-    echo
-    echo "🎉 Deployment Summary"
-    echo "===================="
-    print_success "✅ Docker image built: $IMAGE_NAME:latest"
-    print_success "✅ Container running: $CONTAINER_NAME"
-    print_success "✅ Application accessible at: http://localhost:$PORT"
-    print_success "✅ Health check: http://localhost:$PORT/health"
-    echo
-    print_status "Next steps:"
-    echo "1. Update your Nginx configuration with SSL certificates"
-    echo "2. Configure your domain DNS to point to this server"
-    echo "3. Test the full HTTPS setup"
-    echo "4. Set up monitoring and backups"
-    echo
-    print_success "🚀 SPL Shield is ready for production!"
+    case $METHOD in
+        "docker")
+            print_status "Using Docker run deployment method"
+            check_docker
+            check_files
+            cleanup_existing
+            build_image
+            run_container
+            wait_for_health
+            test_deployment
+            show_info
+            ;;
+        "compose")
+            print_status "Using Docker Compose deployment method"
+            check_docker
+            check_files
+            deploy_compose
+            sleep 10  # Give container time to start
+            test_deployment
+            show_info
+            ;;
+        "build")
+            print_status "Building image only"
+            check_docker
+            check_files
+            build_image
+            ;;
+        *)
+            echo "Usage: $0 [docker|compose|build]"
+            echo "  docker  - Deploy using docker run"
+            echo "  compose - Deploy using docker-compose (default)"
+            echo "  build   - Build image only"
+            exit 1
+            ;;
+    esac
 }
 
-# Handle script arguments
-case "${1:-}" in
-    --build-only)
-        check_docker
-        build_image
-        ;;
-    --deploy-only)
-        check_docker
-        check_port
-        if [ -f "docker-compose.yml" ]; then
-            deploy_with_compose
-        else
-            deploy_with_docker
-        fi
-        check_deployment
-        ;;
-    --cleanup)
-        cleanup
-        ;;
-    *)
-        main
-        ;;
-esac
+# Error handling
+trap 'print_error "Deployment failed at line $LINENO"' ERR
+
+# Run deployment
+main "$@"

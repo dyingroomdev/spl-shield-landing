@@ -1,392 +1,407 @@
 # SPL Shield Docker Deployment Guide 🐳
 
-Complete guide to deploy SPL Shield website using Docker with Nginx reverse proxy on your private VPS.
+Complete guide to dockerize and deploy SPL Shield to your VPS with existing Nginx setup.
 
-## 🏗️ Architecture Overview
+## 🎯 Architecture Overview
 
 ```
-Internet → Nginx (80/443) → Docker Container (3000) → React App
+Internet → Nginx Proxy (80/443) → SPL Shield Container (3000) → React App
 ```
 
-- **Nginx**: Handles SSL termination, reverse proxy, security headers
-- **Docker Container**: Runs React app on port 3000 (internal)
-- **React App**: SPL Shield website served by internal Nginx
+- **Nginx Proxy**: Your existing nginx on ports 80/443 with SSL
+- **SPL Shield Container**: Runs on port 3000 internally
+- **No Port Conflicts**: SPL Shield uses port 3000, nginx proxies to it
 
 ## 📋 Prerequisites
 
-- ✅ Private VPS with Docker installed
-- ✅ Nginx running in Docker (Portainer) on ports 80/443
-- ✅ Domain name pointing to your VPS (splshield.com)
-- ✅ SSL certificate for your domain
+- ✅ Docker installed on your VPS
+- ✅ Docker Compose installed
+- ✅ Nginx running on ports 80/443 (already done)
+- ✅ SSL certificates configured
+- ✅ Domain DNS pointing to your VPS
 
 ## 🚀 Quick Deployment
 
-### Step 1: Prepare Files
+### Option 1: Using Docker Compose (Recommended)
+
 ```bash
-# Make sure you have these files in your project directory:
-ls -la
-# Should show:
-# - Dockerfile
-# - docker-compose.yml
-# - nginx.conf
-# - .dockerignore
-# - deploy-docker.sh
-# - splshield.conf
+# 1. Make deployment script executable
+chmod +x docker-deploy.sh
+
+# 2. Deploy with docker-compose
+./docker-deploy.sh compose
+
+# 3. Verify deployment
+curl http://localhost:3000/health
 ```
 
-### Step 2: Make Deploy Script Executable
+### Option 2: Using Plain Docker
+
 ```bash
-chmod +x deploy-docker.sh
+# Deploy with docker run
+./docker-deploy.sh docker
 ```
 
-### Step 3: Deploy Application
-```bash
-# Full deployment (recommended)
-./deploy-docker.sh
+### Option 3: Via Portainer Stack
 
-# Or step by step:
-./deploy-docker.sh --build-only    # Build image only
-./deploy-docker.sh --deploy-only   # Deploy only
-```
+1. Copy `docker-compose.yml` content
+2. Go to Portainer → Stacks → Add Stack
+3. Paste the compose file
+4. Deploy
 
-### Step 4: Configure Host Nginx
-```bash
-# Copy Nginx config to your host system
-sudo cp splshield.conf /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/splshield.conf /etc/nginx/sites-enabled/
+## 📁 Required Files
 
-# Update SSL certificate paths in splshield.conf
-sudo nano /etc/nginx/sites-available/splshield.conf
-
-# Test configuration
-sudo nginx -t
-
-# Reload Nginx
-sudo systemctl reload nginx
-```
-
-## 📁 File Structure
+Ensure these files are in your project directory:
 
 ```
 spl-shield-landing/
-├── Dockerfile                    # React app container
-├── docker-compose.yml           # Container orchestration
-├── nginx.conf                   # Container Nginx config
-├── splshield.conf               # Host Nginx config
-├── .dockerignore               # Docker build exclusions
-├── deploy-docker.sh            # Deployment automation
-├── src/                        # React source code
-├── package.json               # Dependencies
-└── dist/                      # Built assets (generated)
+├── Dockerfile              # Multi-stage build configuration
+├── docker-compose.yml      # Portainer-ready compose file
+├── nginx.conf              # Internal nginx config (port 3000)
+├── docker-entrypoint.sh    # Container startup script
+├── docker-deploy.sh        # Deployment automation script
+├── nginx-proxy.conf        # Proxy config for main nginx
+└── (your React app files)
+```
+
+## 🔧 Nginx Proxy Setup
+
+### Step 1: Configure Your Main Nginx
+
+Add this configuration to your main nginx (the one running on 80/443):
+
+```bash
+# Edit your nginx configuration
+sudo nano /etc/nginx/sites-available/splshield.com
+
+# Or if using nginx in Docker:
+# Add to your nginx config files
+```
+
+### Step 2: Add Proxy Configuration
+
+Copy the content from `nginx-proxy.conf` artifact and add to your nginx config:
+
+```nginx
+# Upstream for SPL Shield
+upstream spl_shield_backend {
+    server 127.0.0.1:3000;
+    keepalive 32;
+}
+
+# Main site configuration
+server {
+    listen 443 ssl http2;
+    server_name splshield.com www.splshield.com;
+    
+    # Your existing SSL configuration
+    ssl_certificate /path/to/your/ssl/cert.crt;
+    ssl_private_key /path/to/your/ssl/cert.key;
+    
+    # Proxy to SPL Shield container
+    location / {
+        proxy_pass http://spl_shield_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Step 3: Test and Reload Nginx
+
+```bash
+# Test nginx configuration
+sudo nginx -t
+
+# Reload nginx
+sudo nginx -s reload
+
+# Or if using Docker nginx:
+docker exec nginx-container nginx -t
+docker exec nginx-container nginx -s reload
 ```
 
 ## 🐳 Docker Configuration Details
 
-### Dockerfile Stages
+### Container Specifications
 
-**Stage 1: Builder**
-- Uses Node.js 18 Alpine
-- Installs dependencies
-- Builds React application
-
-**Stage 2: Production**
-- Uses Nginx Alpine
-- Copies built assets
-- Serves on port 80 (internal)
-
-### Container Features
-- ✅ Multi-stage build for minimal image size
-- ✅ Health checks for monitoring
-- ✅ Gzip compression enabled
-- ✅ Security headers configured
-- ✅ SPA routing support
-- ✅ Static asset caching
-
-## 🔧 Configuration Options
+- **Base Image**: node:18-alpine (build) + nginx:alpine (runtime)
+- **Port**: 3000 (internal), mapped to host 3000
+- **Health Check**: `/health` endpoint every 30 seconds
+- **Resources**: 512MB RAM limit, 0.5 CPU limit
+- **Restart Policy**: unless-stopped
 
 ### Environment Variables
-```bash
-# In docker-compose.yml or docker run
-NODE_ENV=production
-VITE_SITE_URL=https://splshield.com
-VITE_SCANNER_URL=https://app.splshield.com
-VITE_EXCHANGE_URL=https://ex.splshield.com
-```
 
-### Port Configuration
 ```yaml
-# Default: Container port 80 → Host port 3000
-ports:
-  - "3000:80"
-
-# Custom port:
-ports:
-  - "3001:80"  # Use port 3001 instead
+environment:
+  - NODE_ENV=production
+  - VITE_SITE_URL=https://splshield.com
+  - VITE_SCANNER_URL=https://app.splshield.com
+  - VITE_EXCHANGE_URL=https://ex.splshield.com
 ```
 
-## 🔒 SSL Certificate Setup
+### Volume Mounts (Optional)
 
-### Option 1: Let's Encrypt (Recommended)
+```yaml
+volumes:
+  - nginx-logs:/var/log/nginx
+  - app-data:/usr/share/nginx/html
+```
+
+## 📊 Portainer Stack Deployment
+
+### Step 1: Create Stack in Portainer
+
+1. Login to Portainer
+2. Go to **Stacks** → **Add Stack**
+3. Name: `spl-shield-website`
+4. Paste the `docker-compose.yml` content
+
+### Step 2: Configure Networks
+
+Make sure your existing nginx container and SPL Shield can communicate:
+
+```yaml
+networks:
+  proxy-network:
+    external: true
+    name: your-existing-nginx-network  # Adjust this name
+```
+
+### Step 3: Deploy Stack
+
+1. Click **Deploy the Stack**
+2. Wait for deployment to complete
+3. Check container logs for any errors
+
+### Step 4: Verify Deployment
+
 ```bash
-# Install Certbot
-sudo apt update
-sudo apt install certbot python3-certbot-nginx
+# Check if container is running
+docker ps | grep spl-shield
 
-# Get certificate
-sudo certbot --nginx -d splshield.com -d www.splshield.com
+# Check container health
+docker inspect spl-shield-landing | grep -A 5 "Health"
 
-# Auto-renewal
-sudo crontab -e
-# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+# Test internal endpoint
+curl http://localhost:3000/health
+
+# Check logs
+docker logs spl-shield-landing -f
 ```
 
-### Option 2: Custom Certificate
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### 1. Port 3000 Already in Use
 ```bash
-# Update paths in splshield.conf:
-ssl_certificate /path/to/your/certificate.crt;
-ssl_certificate_key /path/to/your/private.key;
+# Check what's using port 3000
+sudo netstat -tulpn | grep :3000
+
+# Kill process if needed
+sudo kill -9 <PID>
 ```
 
-## 📊 Monitoring & Health Checks
+#### 2. Container Won't Start
+```bash
+# Check container logs
+docker logs spl-shield-landing
 
-### Health Check Endpoints
+# Check if build files exist
+docker exec spl-shield-landing ls -la /usr/share/nginx/html/
+```
+
+#### 3. Nginx Proxy Not Working
+```bash
+# Test nginx config
+sudo nginx -t
+
+# Check nginx error logs
+sudo tail -f /var/log/nginx/error.log
+
+# Test direct connection to container
+curl -v http://localhost:3000/
+```
+
+#### 4. SSL Issues
+```bash
+# Check SSL certificate
+openssl x509 -in /path/to/cert.crt -text -noout
+
+# Test SSL connection
+openssl s_client -connect splshield.com:443
+```
+
+### Health Check Commands
+
 ```bash
 # Container health
 curl http://localhost:3000/health
 
-# Through Nginx proxy
-curl https://splshield.com/health
-```
+# Full site test
+curl -I http://localhost:3000/
 
-### Docker Monitoring
-```bash
-# Check container status
-docker ps | grep spl-shield
-
-# View logs
-docker logs spl-shield-landing
-
-# Monitor resources
-docker stats spl-shield-landing
-```
-
-### Nginx Monitoring
-```bash
-# Check Nginx status
-sudo systemctl status nginx
-
-# View access logs
-sudo tail -f /var/log/nginx/splshield.access.log
-
-# View error logs
-sudo tail -f /var/log/nginx/splshield.error.log
-```
-
-## 🔄 Updating & Maintenance
-
-### Update Application
-```bash
-# Pull latest code
-git pull origin main
-
-# Rebuild and redeploy
-./deploy-docker.sh
-
-# Or manual update:
-docker-compose down
-docker-compose up -d --build
-```
-
-### Database Backup (if applicable)
-```bash
-# Backup container data
-docker run --rm -v spl_shield_data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz /data
-```
-
-### Log Rotation
-```bash
-# Add to /etc/logrotate.d/nginx
-/var/log/nginx/splshield.*.log {
-    daily
-    missingok
-    rotate 14
-    compress
-    delaycompress
-    notifempty
-    create 644 nginx nginx
-    postrotate
-        systemctl reload nginx
-    endscript
-}
-```
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**1. Port 3000 Already in Use**
-```bash
-# Find process using port
-sudo lsof -i :3000
-
-# Kill process or change port in docker-compose.yml
-```
-
-**2. Container Won't Start**
-```bash
-# Check logs
-docker logs spl-shield-landing
-
-# Common causes:
-# - Missing files during build
-# - Incorrect nginx.conf syntax
-# - Port conflicts
-```
-
-**3. Nginx Configuration Errors**
-```bash
-# Test configuration
-sudo nginx -t
-
-# Check syntax of splshield.conf
-# Ensure SSL certificate paths are correct
-```
-
-**4. SSL Certificate Issues**
-```bash
-# Check certificate expiration
-openssl x509 -in /path/to/cert.crt -text -noout | grep "Not After"
-
-# Verify certificate chain
-openssl verify -CApath /etc/ssl/certs /path/to/cert.crt
-```
-
-**5. Application Not Loading**
-```bash
-# Check if container is running
-docker ps
-
-# Check if Nginx proxy is working
-curl -I http://localhost:3000
-
-# Check host Nginx configuration
-sudo nginx -t && sudo systemctl reload nginx
+# Through nginx proxy
+curl -I https://splshield.com/
 ```
 
 ## 📈 Performance Optimization
 
-### Docker Optimizations
-```bash
-# Use specific Node version for consistent builds
-FROM node:18.17-alpine
+### 1. Nginx Caching
 
-# Enable BuildKit for faster builds
-export DOCKER_BUILDKIT=1
-```
+Add to your main nginx config:
 
-### Nginx Optimizations
 ```nginx
-# Add to splshield.conf
-client_max_body_size 10M;
-keepalive_timeout 65;
-gzip_comp_level 6;
+# Cache configuration
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=spl_cache:10m inactive=60m;
+
+location / {
+    proxy_pass http://spl_shield_backend;
+    proxy_cache spl_cache;
+    proxy_cache_valid 200 1h;
+    proxy_cache_valid 404 1m;
+}
 ```
 
-### React Build Optimizations
-```bash
-# Analyze bundle size
-npm run build
-npx webpack-bundle-analyzer dist/static/js/*.js
+### 2. Compression
+
+Already enabled in container nginx config:
+- Gzip compression for text files
+- Static asset caching
+- Optimized buffer sizes
+
+### 3. Resource Limits
+
+Adjust in `docker-compose.yml`:
+
+```yaml
+deploy:
+  resources:
+    limits:
+      cpus: '1.0'        # Increase if needed
+      memory: 1G         # Increase if needed
+    reservations:
+      cpus: '0.5'
+      memory: 512M
 ```
 
-## 🔐 Security Best Practices
+## 🔒 Security Considerations
 
-### Container Security
-- ✅ Non-root user (nginx user)
-- ✅ Minimal base image (Alpine)
-- ✅ No unnecessary packages
-- ✅ Regular security updates
+### 1. Container Security
 
-### Nginx Security
-- ✅ SSL/TLS configuration
-- ✅ Security headers
-- ✅ Rate limiting (optional)
-- ✅ Access controls
+- ✅ Runs as non-root user (nginx)
+- ✅ Multi-stage build (smaller attack surface)
+- ✅ Health checks enabled
+- ✅ Resource limits configured
 
-### Network Security
-```bash
-# Optional: Create custom network
-docker network create spl-shield-network --driver bridge
+### 2. Network Security
 
-# Use in docker-compose.yml
+```yaml
 networks:
-  default:
-    external:
-      name: spl-shield-network
+  spl-shield-network:
+    driver: bridge
+    internal: true  # Internal network only
 ```
 
-## 🎯 Production Checklist
+### 3. Nginx Security Headers
 
-### Pre-Deployment
-- [ ] SSL certificates configured
-- [ ] Domain DNS pointing to server
-- [ ] Firewall rules configured
-- [ ] Backup procedures in place
+Already configured:
+- X-Frame-Options
+- X-Content-Type-Options
+- X-XSS-Protection
+- Content-Security-Policy
 
-### Post-Deployment
-- [ ] Health checks passing
-- [ ] SSL grade A+ (test with ssllabs.com)
-- [ ] Performance tests completed
-- [ ] Monitoring alerts configured
-- [ ] Documentation updated
+## 🚀 CI/CD Integration
 
-## 📞 Support Commands
+### GitHub Actions (Optional)
 
-### Quick Commands Reference
+```yaml
+name: Deploy SPL Shield
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to VPS
+        run: |
+          ssh user@your-vps.com "cd /path/to/spl-shield && ./docker-deploy.sh compose"
+```
+
+### Manual Updates
+
 ```bash
-# Deploy application
-./deploy-docker.sh
+# Pull latest changes
+git pull origin main
 
-# Check status
-docker ps | grep spl-shield
+# Rebuild and redeploy
+./docker-deploy.sh compose
 
-# View logs
-docker logs spl-shield-landing
-
-# Update application
-git pull && ./deploy-docker.sh
-
-# Restart container
-docker restart spl-shield-landing
-
-# Clean up
-docker system prune -f
+# Or just rebuild
+docker-compose up -d --build
 ```
 
-### Emergency Recovery
+## 📊 Monitoring
+
+### Container Stats
+
 ```bash
-# Stop and remove everything
-docker-compose down
-docker rmi spl-shield/landing
+# Resource usage
+docker stats spl-shield-landing
 
-# Clean rebuild
-./deploy-docker.sh
+# Live logs
+docker logs spl-shield-landing -f
 
-# Restore from backup (if needed)
-docker run --rm -v spl_shield_data:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz -C /
+# Container info
+docker inspect spl-shield-landing
 ```
+
+### Website Monitoring
+
+```bash
+# Setup monitoring script
+curl -s http://localhost:3000/health | grep "healthy" || echo "ALERT: Site down"
+
+# Add to crontab for monitoring
+*/5 * * * * curl -s http://localhost:3000/health | grep "healthy" || mail -s "SPL Shield Down" admin@splshield.com
+```
+
+## 🎯 Next Steps
+
+After successful deployment:
+
+1. **Configure DNS**: Point splshield.com to your VPS IP
+2. **SSL Setup**: Ensure SSL certificates are properly configured
+3. **Monitoring**: Set up monitoring and alerting
+4. **Backups**: Configure automated backups
+5. **Scaling**: Consider load balancing for high traffic
+
+## 📞 Support
+
+If you encounter issues:
+
+1. Check container logs: `docker logs spl-shield-landing`
+2. Verify nginx config: `nginx -t`
+3. Test connectivity: `curl http://localhost:3000/health`
+4. Check resource usage: `docker stats`
 
 ---
 
 ## 🎉 Success!
 
-Your SPL Shield website is now:
-- ✅ **Dockerized** for consistent deployments
-- ✅ **Secured** with SSL and security headers
-- ✅ **Optimized** for production performance
-- ✅ **Monitored** with health checks
-- ✅ **Scalable** with Docker orchestration
+Your SPL Shield website should now be:
+- ✅ Running in Docker container on port 3000
+- ✅ Accessible via nginx proxy on ports 80/443
+- ✅ SSL-secured and production-ready
+- ✅ Monitored with health checks
+- ✅ Ready for high traffic
 
-**Access your website at: https://splshield.com** 🚀🛡️
-
-For additional support, check the troubleshooting section or container logs for specific error messages.
+**Visit https://splshield.com to see your deployed website!** 🛡️🚀
