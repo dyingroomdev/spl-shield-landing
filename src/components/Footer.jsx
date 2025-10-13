@@ -1,10 +1,11 @@
 import React from 'react';
-import { Shield, ExternalLink, Github, Twitter, Mail, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import SPLShieldLogo from './SPLShieldLogo';
+import { ExternalLink, Twitter, Heart, Facebook, Instagram, Send } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleExternalRedirect = (url) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -14,20 +15,20 @@ const Footer = () => {
     products: [
       { name: 'SPL Shield Scanner', url: 'https://app.splshield.com', external: true },
       { name: 'TDL Token Exchange', url: 'https://ex.splshield.com', external: true },
-      { name: 'API Documentation', url: '#', external: false },
-      { name: 'Developer Tools', url: '#', external: false }
+      { name: 'Security Features', url: '#features', external: false },
+      { name: 'Roadmap', url: '#roadmap', external: false }
     ],
     resources: [
       { name: 'Whitepaper', url: '/whitepaper', external: false },
-      { name: 'Security Guide', url: '#', external: false },
-      { name: 'Community', url: '#', external: false },
-      { name: 'Blog', url: '#', external: false }
+      { name: 'Tokenomics', url: '#tokenomics', external: false },
+      { name: 'Product Suite', url: '#products', external: false },
+      { name: 'Updates', url: '#roadmap', external: false }
     ],
     support: [
-      { name: 'Help Center', url: '#', external: false },
+      { name: 'Help Center', url: '#contact', external: false },
       { name: 'Contact Us', url: '/contact', external: false },
-      { name: 'Bug Reports', url: '#', external: false },
-      { name: 'Feature Requests', url: '#', external: false }
+      { name: 'Status Page', url: 'https://status.splshield.com', external: true },
+      { name: 'Knowledge Base', url: 'https://docs.splshield.com', external: true }
     ],
     legal: [
       { name: 'Privacy Policy', url: '/privacy-policy', external: false },
@@ -38,29 +39,44 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Twitter, url: 'https://twitter.com/splshield', name: 'Twitter' },
-    { icon: Github, url: 'https://github.com/splshield', name: 'GitHub' },
-    { icon: Mail, url: 'mailto:support@splshield.com', name: 'Email' }
+    { icon: Twitter, url: 'https://x.com/splshield', name: 'X (Twitter)' },
+    { icon: Facebook, url: 'https://www.facebook.com/splshield', name: 'Facebook' },
+    { icon: Instagram, url: 'https://www.instagram.com/splshield', name: 'Instagram' },
+    { icon: Send, url: 'https://t.me/splshield', name: 'Telegram' }
   ];
 
   const handleLinkClick = (url, external) => {
     if (external && url.startsWith('http')) {
       handleExternalRedirect(url);
-    } else if (url.startsWith('#')) {
+      return;
+    }
+
+    if (url.startsWith('mailto:')) {
+      window.location.href = url;
+      return;
+    }
+
+    if (url.startsWith('#')) {
+      if (location.pathname !== '/') {
+        navigate('/', { state: { scrollTo: url } });
+        return;
+      }
+
       const element = document.querySelector(url);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
-    } else if (url.startsWith('mailto:')) {
-      window.location.href = url;
+      return;
     }
-    // For internal routes, Link component handles the routing
+
+    navigate(url);
   };
 
   const renderLink = (link) => {
-    if (link.external || link.url.startsWith('#') || link.url.startsWith('mailto:')) {
+    if (link.external || link.url.startsWith('#') || link.url.startsWith('mailto:') || link.url.startsWith('http')) {
       return (
         <button
+          type="button"
           onClick={() => handleLinkClick(link.url, link.external)}
           className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center space-x-1"
         >
@@ -68,16 +84,16 @@ const Footer = () => {
           {link.external && <ExternalLink className="w-3 h-3" />}
         </button>
       );
-    } else {
-      return (
-        <Link
-          to={link.url}
-          className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
-        >
-          {link.name}
-        </Link>
-      );
     }
+    
+    return (
+      <Link
+        to={link.url}
+        className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
+      >
+        {link.name}
+      </Link>
+    );
   };
 
   return (
@@ -91,8 +107,13 @@ const Footer = () => {
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-3 mb-6">
-                 <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center shadow-glow-green">
-                  <SPLShieldLogo className="w-8 h-8" />
+                 <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center shadow-glow-green overflow-hidden">
+                  <img
+                    src="/assets/logo.png"
+                    alt="SPL Shield"
+                    className="w-10 h-10 object-contain"
+                    loading="lazy"
+                  />
                 </div>
                 <div>
                   <span className="text-xl font-bold font-display">SPL Shield</span>
@@ -110,7 +131,8 @@ const Footer = () => {
                 {socialLinks.map((social) => (
                   <button
                     key={social.name}
-                    onClick={() => handleLinkClick(social.url)}
+                    type="button"
+                    onClick={() => handleExternalRedirect(social.url)}
                     className="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition-colors duration-200 group"
                     aria-label={social.name}
                   >

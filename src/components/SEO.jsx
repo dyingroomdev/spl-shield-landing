@@ -76,9 +76,10 @@ const SEO = ({
           "url": siteUrl,
           "logo": `${siteUrl}/logo.png`,
           "sameAs": [
-            "https://twitter.com/splshield",
-            "https://github.com/splshield",
-            "https://discord.gg/splshield"
+            "https://x.com/splshield",
+            "https://www.facebook.com/splshield",
+            "https://www.instagram.com/splshield",
+            "https://t.me/splshield"
           ],
           "contactPoint": {
             "@type": "ContactPoint",

@@ -33,9 +33,9 @@ const Features = () => {
     {
       icon: DollarSign,
       title: 'TDL Token Ecosystem',
-      description: 'Secure, utility-driven token with advanced features including controlled burning and liquidity management.',
+      description: 'Secure, utility-driven token with transparent tokenomics, proactive liquidity management, and long-term incentives.',
       gradient: 'from-tdl-purple-500 to-tdl-orange-500',
-      benefits: ['Utility token', 'Burn mechanism', 'Liquidity control', 'Governance rights']
+      benefits: ['Utility token', 'Transparent allocation', 'Liquidity control', 'Governance rights']
     }
   ];
 

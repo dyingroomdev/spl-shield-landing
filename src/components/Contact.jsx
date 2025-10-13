@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Mail, 
-  MessageCircle, 
-  Send, 
-  Github, 
-  Twitter, 
+import {
+  Mail,
+  Send,
+  Twitter,
+  Facebook,
+  Instagram,
   ExternalLink,
-  CheckCircle,
-  AlertCircle,
-  Globe,
-  Users,
-  Book
+  CheckCircle
 } from 'lucide-react';
 
 const Contact = () => {
@@ -52,30 +48,41 @@ const Contact = () => {
       title: 'Email Support',
       description: 'Get in touch with our team',
       contact: 'support@splshield.com',
-      action: 'Send Email'
+      action: 'Send Email',
+      href: 'mailto:support@splshield.com'
     },
     {
-      icon: MessageCircle,
-      title: 'Community Discord',
-      description: 'Join our active community',
-      contact: 'discord.gg/splshield',
-      action: 'Join Discord'
+      icon: Send,
+      title: 'Telegram Community',
+      description: 'Chat with our moderators in real-time',
+      contact: 't.me/splshield',
+      action: 'Join Telegram',
+      href: 'https://t.me/splshield'
     },
     {
-      icon: Github,
-      title: 'Open Source',
-      description: 'Contribute to our projects',
-      contact: 'github.com/splshield',
-      action: 'View GitHub'
+      icon: Twitter,
+      title: 'X (Twitter)',
+      description: 'Follow product updates & announcements',
+      contact: '@splshield',
+      action: 'Visit X Profile',
+      href: 'https://x.com/splshield'
     }
   ];
 
   const socialLinks = [
-    { icon: Twitter, name: 'Twitter', url: 'https://twitter.com/splshield' },
-    { icon: Github, name: 'GitHub', url: 'https://github.com/splshield' },
-    { icon: Globe, name: 'Website', url: 'https://splshield.com' },
-    { icon: Book, name: 'Docs', url: 'https://docs.splshield.com' }
+    { icon: Twitter, name: 'X (Twitter)', url: 'https://x.com/splshield' },
+    { icon: Facebook, name: 'Facebook', url: 'https://www.facebook.com/splshield' },
+    { icon: Instagram, name: 'Instagram', url: 'https://www.instagram.com/splshield' },
+    { icon: Send, name: 'Telegram', url: 'https://t.me/splshield' }
   ];
+
+  const handleExternalLink = (href) => {
+    if (href.startsWith('mailto:')) {
+      window.location.href = href;
+      return;
+    }
+    window.open(href, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section id="contact" className="section-padding bg-gray-50 dark:bg-dark-surface">
@@ -199,7 +206,12 @@ const Contact = () => {
               </h3>
               <div className="space-y-4">
                 {contactMethods.map((method, index) => (
-                  <div key={index} className="card p-6 group hover:shadow-glow-green transition-all duration-300">
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleExternalLink(method.href)}
+                    className="card p-6 group hover:shadow-glow-green transition-all duration-300 text-left w-full"
+                  >
                     <div className="flex items-start space-x-4">
                       <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-primary-200 dark:group-hover:bg-primary-800 transition-colors">
                         <method.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
@@ -219,7 +231,7 @@ const Contact = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -233,6 +245,8 @@ const Contact = () => {
                 {socialLinks.map((social, index) => (
                   <button
                     key={index}
+                    type="button"
+                    onClick={() => handleExternalLink(social.url)}
                     className="card p-4 group hover:shadow-glow-green transition-all duration-300 text-left"
                   >
                     <div className="flex items-center space-x-3">

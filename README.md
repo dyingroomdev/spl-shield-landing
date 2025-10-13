@@ -208,8 +208,10 @@ MIT License - see LICENSE file for details
 ## 📞 Support
 
 - **Email**: support@splshield.com
-- **Discord**: discord.gg/splshield
-- **GitHub**: github.com/splshield
+- **X (Twitter)**: https://x.com/splshield
+- **Facebook**: https://www.facebook.com/splshield
+- **Instagram**: https://www.instagram.com/splshield
+- **Telegram**: https://t.me/splshield
 
 ## 🎉 What's Next?
 

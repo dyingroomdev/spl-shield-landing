@@ -32,7 +32,7 @@ const Products = () => {
 
   const tdlFeatures = [
     { icon: DollarSign, text: 'Utility Token Design' },
-    { icon: Lock, text: 'Burn Mechanism' },
+    { icon: Lock, text: 'Institutional-Grade Custody' },
     { icon: TrendingUp, text: 'Liquidity Management' },
     { icon: Coins, text: 'Staking Rewards' },
     { icon: Zap, text: 'Fast Transactions' },
@@ -142,9 +142,9 @@ const Products = () => {
 
               {/* Description */}
               <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg">
-                Trade our utility token TDL with advanced features including controlled burning, 
-                liquidity management, and governance rights. Built with security and transparency 
-                as core principles for sustainable DeFi trading.
+                Trade our utility token TDL with transparent tokenomics, proactive liquidity management, 
+                and governance rights. Every mechanism is engineered for long-term sustainability and 
+                institutional-grade security.
               </p>
 
               {/* Features */}
@@ -158,18 +158,22 @@ const Products = () => {
               </div>
 
               {/* Token Info */}
-              <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-gradient-to-r from-tdl-purple-50 to-tdl-orange-50 dark:from-tdl-purple-900/20 dark:to-tdl-orange-900/20 rounded-lg">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 p-4 bg-gradient-to-r from-tdl-purple-50 to-tdl-orange-50 dark:from-tdl-purple-900/20 dark:to-tdl-orange-900/20 rounded-lg">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-tdl-purple-600 dark:text-tdl-purple-400">TDL</div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">Symbol</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-tdl-orange-600 dark:text-tdl-orange-400">1M</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Max Supply</div>
+                  <div className="text-2xl font-bold text-tdl-orange-600 dark:text-tdl-orange-400">1B</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Total Supply</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold bg-tdl-gradient bg-clip-text text-transparent">Live</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Status</div>
+                  <div className="text-2xl font-bold bg-tdl-gradient bg-clip-text text-transparent">25%</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Presale Allocation</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-tdl-purple-600 dark:text-tdl-purple-400">$500K</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Presale Target</div>
                 </div>
               </div>
 

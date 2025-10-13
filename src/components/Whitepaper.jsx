@@ -30,7 +30,7 @@ const Whitepaper = () => {
       icon: TrendingUp,
       title: 'TDL Token Economics',
       description: 'Detailed analysis of the TDL token utility, governance model, and economic incentives.',
-      topics: ['Token Utility', 'Burn Mechanisms', 'Governance Model', 'Economic Incentives']
+      topics: ['Token Utility', 'Transparent Allocation', 'Governance Model', 'Economic Incentives']
     },
     {
       icon: Users,

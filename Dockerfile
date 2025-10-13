@@ -28,8 +28,8 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine AS production
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init curl
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
