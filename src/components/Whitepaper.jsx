@@ -6,7 +6,8 @@ import {
   Shield, 
   TrendingUp, 
   Users, 
-  Code, 
+  Code,
+  Twitter,
   ExternalLink,
   CheckCircle,
   ArrowRight
@@ -41,13 +42,24 @@ const Whitepaper = () => {
   ];
 
   const downloadFormats = [
-    { format: 'PDF', size: '2.4 MB', icon: FileText },
-    { format: 'EPUB', size: '1.8 MB', icon: BookOpen },
+    { format: 'PDF', size: '2.4 MB', icon: FileText, path: '/assets/whitepaper_v101.pdf' },
+    { format: 'EPUB', size: '1.8 MB', icon: BookOpen, path: '/assets/whitepaper_v101.epub' },
   ];
 
+  const openExternal = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleDownload = (format) => {
-    // In a real implementation, this would trigger the actual download
-    console.log(`Downloading whitepaper in ${format} format`);
+    const selected = downloadFormats.find((item) => item.format === format);
+    if (selected) {
+      const link = document.createElement('a');
+      link.href = selected.path;
+      link.download = selected.path.split('/').pop();
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (
@@ -78,7 +90,10 @@ const Whitepaper = () => {
                 <Download className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
               </button>
             ))}
-            <button className="btn-secondary flex items-center space-x-2">
+            <button
+              onClick={() => openExternal('https://docs.splshield.com')}
+              className="btn-secondary flex items-center space-x-2"
+            >
               <span>Read Online</span>
               <ExternalLink className="w-4 h-4" />
             </button>
@@ -178,14 +193,20 @@ const Whitepaper = () => {
               Join our community of developers and security enthusiasts building the future of DeFi security.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary flex items-center space-x-2">
+              <button
+                onClick={() => openExternal('https://t.me/splshield')}
+                className="btn-primary flex items-center space-x-2"
+              >
                 <Users className="w-5 h-5" />
                 <span>Join Community</span>
                 <ExternalLink className="w-4 h-4" />
               </button>
-              <button className="btn-secondary flex items-center space-x-2">
-                <Code className="w-5 h-5" />
-                <span>View GitHub</span>
+              <button
+                onClick={() => openExternal('https://x.com/splshield')}
+                className="btn-secondary flex items-center space-x-2"
+              >
+                <Twitter className="w-5 h-5" />
+                <span>Follow on X</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
