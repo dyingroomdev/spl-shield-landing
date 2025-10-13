@@ -21,7 +21,7 @@ ENV NODE_ENV=production
 ENV VITE_SITE_URL=https://splshield.com
 ENV VITE_SCANNER_URL=https://app.splshield.com
 ENV VITE_EXCHANGE_URL=https://ex.splshield.com
-
+ENV VITE_DOCUMENTS_URL=https://docs.splshield.com
 # Build the application
 RUN npm run build
 

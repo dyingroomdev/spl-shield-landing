@@ -17,6 +17,10 @@ const Roadmap = () => {
   const [activePhase, setActivePhase] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
+  const handleExternalRedirect = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   // Roadmap phases
   const roadmapPhases = [
     {
@@ -335,7 +339,10 @@ const Roadmap = () => {
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                   Follow our progress and get notified about major milestones.
                 </p>
-                <button className="btn-primary w-full flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => handleExternalRedirect('https://t.me/splshield')}
+                  className="btn-primary w-full flex items-center justify-center space-x-2"
+                >
                   <span>Join Community</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>

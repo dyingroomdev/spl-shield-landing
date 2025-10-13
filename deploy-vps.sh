@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # SPL Shield Docker Deployment Script
-set -e
+set -euo pipefail
+IFS=$'\n\t'
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,6 +16,7 @@ IMAGE_NAME="spl-shield-landing"
 CONTAINER_NAME="spl-shield-landing"
 HOST_PORT="3000"
 CONTAINER_PORT="3000"
+DOCKER_COMPOSE_CMD=()
 
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -40,6 +42,20 @@ check_docker() {
         exit 1
     fi
     print_success "Docker is running"
+}
+
+# Detect docker compose command
+detect_compose() {
+    if command -v docker-compose > /dev/null 2>&1; then
+        DOCKER_COMPOSE_CMD=("docker-compose")
+        print_success "Using docker-compose CLI"
+    elif docker compose version > /dev/null 2>&1; then
+        DOCKER_COMPOSE_CMD=("docker" "compose")
+        print_success "Using docker compose plugin"
+    else
+        print_error "Docker Compose is not installed. Install docker compose or docker-compose."
+        exit 1
+    fi
 }
 
 # Check if required files exist
@@ -118,11 +134,15 @@ run_container() {
 deploy_compose() {
     print_status "Deploying with docker-compose..."
     
+    if [ ${#DOCKER_COMPOSE_CMD[@]} -eq 0 ]; then
+        detect_compose
+    fi
+    
     # Stop existing services
-    docker-compose down --remove-orphans || true
+    "${DOCKER_COMPOSE_CMD[@]}" down --remove-orphans || true
     
     # Build and start services
-    docker-compose up -d --build
+    "${DOCKER_COMPOSE_CMD[@]}" up -d --build
     
     if [ $? -eq 0 ]; then
         print_success "Docker Compose deployment completed"
@@ -241,6 +261,7 @@ main() {
             print_status "Using Docker Compose deployment method"
             check_docker
             check_files
+            detect_compose
             deploy_compose
             sleep 10  # Give container time to start
             test_deployment

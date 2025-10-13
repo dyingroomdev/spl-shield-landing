@@ -52,11 +52,60 @@ const Tokenomics = () => {
 
   // Tokenomics data
   const tokenomicsData = [
-    { name: 'Presale', percentage: 25, color: 'bg-tdl-purple-500', lightColor: 'bg-tdl-purple-100', darkColor: 'bg-tdl-purple-900', icon: Users },
-    { name: 'Liquidity', percentage: 20, color: 'bg-blue-500', lightColor: 'bg-blue-100', darkColor: 'bg-blue-900', icon: TrendingUp },
-    { name: 'Rewards', percentage: 25, color: 'bg-green-500', lightColor: 'bg-green-100', darkColor: 'bg-green-900', icon: Award },
-    { name: 'Team', percentage: 15, color: 'bg-tdl-orange-500', lightColor: 'bg-tdl-orange-100', darkColor: 'bg-tdl-orange-900', icon: Users },
-    { name: 'Marketing', percentage: 15, color: 'bg-yellow-500', lightColor: 'bg-yellow-100', darkColor: 'bg-yellow-900', icon: Megaphone }
+    {
+      name: 'Presale (Public Sale)',
+      percentage: 25,
+      color: 'bg-tdl-purple-500',
+      lightColor: 'bg-tdl-purple-100',
+      darkColor: 'bg-tdl-purple-900',
+      icon: Users,
+      vesting: '12-month linear unlock, no cliff, starting at DEX listing'
+    },
+    {
+      name: 'Liquidity & CEX Listings',
+      percentage: 20,
+      color: 'bg-blue-500',
+      lightColor: 'bg-blue-100',
+      darkColor: 'bg-blue-900',
+      icon: TrendingUp,
+      vesting: 'Locked liquidity at launch; vesting aligns with exchange partnerships and depth targets'
+    },
+    {
+      name: 'Team & Development',
+      percentage: 20,
+      color: 'bg-tdl-orange-500',
+      lightColor: 'bg-tdl-orange-100',
+      darkColor: 'bg-tdl-orange-900',
+      icon: Users,
+      vesting: '24-month linear vesting'
+    },
+    {
+      name: 'Staking & Rewards',
+      percentage: 15,
+      color: 'bg-green-500',
+      lightColor: 'bg-green-100',
+      darkColor: 'bg-green-900',
+      icon: Award,
+      vesting: 'Distributed over 48 months to incentivize long-term staking and participation'
+    },
+    {
+      name: 'Marketing & Partnerships',
+      percentage: 10,
+      color: 'bg-yellow-500',
+      lightColor: 'bg-yellow-100',
+      darkColor: 'bg-yellow-900',
+      icon: Megaphone,
+      vesting: 'Released per strategic milestones and partnerships'
+    },
+    {
+      name: 'Treasury & Ecosystem Growth',
+      percentage: 10,
+      color: 'bg-teal-500',
+      lightColor: 'bg-teal-100',
+      darkColor: 'bg-teal-900',
+      icon: Coins,
+      vesting: 'Reserved for ecosystem expansion, grants, and long-term sustainability'
+    }
   ];
 
   const presaleDetails = [
@@ -161,28 +210,33 @@ const Tokenomics = () => {
             
             {/* Legend */}
             <div className="space-y-4">
-          {tokenomicsData.map((item, index) => (
-            <div 
-              key={item.name}
-              className="flex items-center justify-between p-4 bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 group hover:shadow-md transition-all duration-200"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-                  <div className="flex items-center space-x-3">
+              {tokenomicsData.map((item, index) => (
+                <div 
+                  key={item.name}
+                  className="flex items-start justify-between p-4 bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 group hover:shadow-md transition-all duration-200"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex items-start space-x-3">
                     <div className={`w-4 h-4 rounded-full ${item.color}`}></div>
                     <div className={`w-10 h-10 ${item.lightColor} dark:${item.darkColor} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
                       <item.icon className={`w-5 h-5 ${item.color.replace('bg-', 'text-')}`} />
                     </div>
-                    <span className="font-medium text-gray-900 dark:text-white">{item.name}</span>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-gray-900 dark:text-white">{item.percentage}%</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {Math.round((item.percentage / 100) * TOTAL_SUPPLY).toLocaleString()} TDL
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.vesting}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-gray-900 dark:text-white">{item.percentage}%</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {Math.round((item.percentage / 100) * TOTAL_SUPPLY).toLocaleString()} TDL
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
           </div>
 
           {/* Presale Details Section */}

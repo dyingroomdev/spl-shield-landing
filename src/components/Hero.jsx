@@ -55,7 +55,7 @@ const Hero = () => {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 sm:pt-32 lg:pt-0">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-hero-light dark:bg-hero-gradient"></div>
       <div className="absolute inset-0 grid-pattern dark:grid-pattern-dark opacity-50"></div>
@@ -152,7 +152,7 @@ const Hero = () => {
             </button>
 
             <button
-              onClick={() => scrollToSection('#features')}
+              onClick={() => handleExternalRedirect('https://docs.splshield.com')}
               className="btn-secondary text-lg px-8 py-4 flex items-center space-x-3 group"
             >
               <span>Learn More</span>

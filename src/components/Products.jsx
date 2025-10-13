@@ -115,7 +115,10 @@ const Products = () => {
                   <span>Launch Scanner</span>
                   <ExternalLink className="w-4 h-4" />
                 </button>
-                <button className="btn-secondary flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => handleExternalRedirect('https://docs.splshield.com')}
+                  className="btn-secondary flex items-center justify-center space-x-2"
+                >
                   <span>Learn More</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -186,7 +189,10 @@ const Products = () => {
                   <span>Start Trading</span>
                   <ExternalLink className="w-4 h-4" />
                 </button>
-                <button className="btn-secondary flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => handleExternalRedirect('https://docs.splshield.com')}
+                  className="btn-secondary flex items-center justify-center space-x-2"
+                >
                   <span>View Docs</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>

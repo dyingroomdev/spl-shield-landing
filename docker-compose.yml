@@ -11,13 +11,13 @@ services:
     
     # Port mapping - expose 3000 to host
     ports:
-      - "3000:3000"
+      - "${HOST_PORT:-3000}:${CONTAINER_PORT:-3000}"
     
     # Environment variables
     environment:
-      - NODE_ENV=production
-      - NGINX_PORT=3000
-      - NGINX_HOST=0.0.0.0
+      NODE_ENV: production
+      NGINX_PORT: "${CONTAINER_PORT:-3000}"
+      NGINX_HOST: 0.0.0.0
     
     # Resource limits
     deploy:
