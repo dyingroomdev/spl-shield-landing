@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { SCANNER_URL } from '../config/appLinks';
 
 const SEO = ({ 
   title = "SPL Shield - Complete Solana Security Ecosystem",
@@ -13,6 +14,8 @@ const SEO = ({
   modifiedTime
 }) => {
   const siteUrl = "https://splshield.com";
+  const scannerUrl = SCANNER_URL;
+  const scannerSearchTemplate = `${scannerUrl.replace(/\/$/, '')}/scan?token={search_term_string}`;
   const fullCanonical = canonical ? `${siteUrl}${canonical}` : siteUrl;
   
   return (
@@ -100,7 +103,7 @@ const SEO = ({
           "@type": "SoftwareApplication",
           "name": "SPL Shield Scanner",
           "description": "AI-powered security scanning for Solana tokens and wallets",
-          "url": "https://app.splshield.com",
+          "url": scannerUrl,
           "applicationCategory": "SecurityApplication",
           "operatingSystem": "Web Browser",
           "offers": {
@@ -127,7 +130,7 @@ const SEO = ({
             "@type": "SearchAction",
             "target": {
               "@type": "EntryPoint",
-              "urlTemplate": "https://app.splshield.com/scan?token={search_term_string}"
+              "urlTemplate": scannerSearchTemplate
             },
             "query-input": "required name=search_term_string"
           }

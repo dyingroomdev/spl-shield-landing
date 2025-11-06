@@ -139,8 +139,12 @@ docker exec nginx-container nginx -s reload
 environment:
   - NODE_ENV=production
   - VITE_SITE_URL=https://splshield.com
+  - VITE_APP_SCANNER_URL=https://app.splshield.com
+  - VITE_APP_EXCHANGE_URL=https://presale.splshield.com
+  - VITE_APP_API_URL=https://api.splshield.com
   - VITE_SCANNER_URL=https://app.splshield.com
-  - VITE_EXCHANGE_URL=https://ex.splshield.com
+  - VITE_EXCHANGE_URL=https://presale.splshield.com
+  - VITE_API_URL=https://api.splshield.com
 ```
 
 ### Volume Mounts (Optional)

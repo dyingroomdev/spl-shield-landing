@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink, Twitter, Heart, Facebook, Instagram, Send } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { SCANNER_URL, EXCHANGE_URL } from '../config/appLinks';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -13,8 +14,8 @@ const Footer = () => {
 
   const footerLinks = {
     products: [
-      { name: 'SPL Shield Scanner', url: 'https://app.splshield.com', external: true },
-      { name: 'TDL Token Exchange', url: 'https://ex.splshield.com', external: true },
+      { name: 'SPL Shield Scanner', url: SCANNER_URL, external: true },
+      { name: 'TDL Token Exchange', url: EXCHANGE_URL, external: true },
       { name: 'Security Features', url: '#features', external: false },
       { name: 'Roadmap', url: '#roadmap', external: false }
     ],
@@ -208,7 +209,7 @@ const Footer = () => {
             {/* Quick Links */}
             <div className="flex items-center space-x-6 text-sm">
               <button
-                onClick={() => handleExternalRedirect('https://app.splshield.com')}
+                onClick={() => handleExternalRedirect(SCANNER_URL)}
                 className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center space-x-1"
               >
                 <span>Launch App</span>

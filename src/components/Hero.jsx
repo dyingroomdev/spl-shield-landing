@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, TrendingUp, Users, Lock, ExternalLink, ArrowRight } from 'lucide-react';
+import { SCANNER_URL, EXCHANGE_URL } from '../config/appLinks';
 
 const Hero = () => {
   const [stats, setStats] = useState({
@@ -134,7 +135,7 @@ const Hero = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-in" style={{animationDelay: '0.4s'}}>
             <button
-              onClick={() => handleExternalRedirect('https://app.splshield.com')}
+              onClick={() => handleExternalRedirect(SCANNER_URL)}
               className="btn-primary text-lg px-8 py-4 flex items-center space-x-3 group"
             >
               <Shield className="w-5 h-5" />
@@ -143,7 +144,7 @@ const Hero = () => {
             </button>
             
             <button
-              onClick={() => handleExternalRedirect('https://ex.splshield.com')}
+              onClick={() => handleExternalRedirect(EXCHANGE_URL)}
               className="btn-tdl text-lg px-8 py-4 flex items-center space-x-3 group"
             >
               <TrendingUp className="w-5 h-5" />

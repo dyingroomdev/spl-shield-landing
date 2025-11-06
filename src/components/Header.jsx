@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Sun, Moon, ExternalLink } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { SCANNER_URL, EXCHANGE_URL } from '../config/appLinks';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -138,14 +139,14 @@ const Header = () => {
             {/* Action Buttons - Desktop */}
             <div className="hidden lg:flex items-center space-x-3">
               <button
-                onClick={() => handleExternalRedirect('https://app.splshield.com')}
+                onClick={() => handleExternalRedirect(SCANNER_URL)}
                 className="btn-secondary flex items-center space-x-2"
               >
                 <span>Launch Scanner</span>
                 <ExternalLink className="w-4 h-4" />
               </button>
               <button
-                onClick={() => handleExternalRedirect('https://ex.splshield.com')}
+                onClick={() => handleExternalRedirect(EXCHANGE_URL)}
                 className="btn-tdl flex items-center space-x-2"
               >
                 <span>TDL Exchange</span>
@@ -186,14 +187,14 @@ const Header = () => {
             {/* Mobile Action Buttons */}
             <div className="pt-4 space-y-3 px-4">
               <button
-                onClick={() => handleExternalRedirect('https://app.splshield.com')}
+                onClick={() => handleExternalRedirect(SCANNER_URL)}
                 className="w-full btn-secondary flex items-center justify-center space-x-2"
               >
                 <span>Launch Scanner</span>
                 <ExternalLink className="w-4 h-4" />
               </button>
               <button
-                onClick={() => handleExternalRedirect('https://ex.splshield.com')}
+                onClick={() => handleExternalRedirect(EXCHANGE_URL)}
                 className="w-full btn-tdl flex items-center justify-center space-x-2"
               >
                 <span>TDL Exchange</span>

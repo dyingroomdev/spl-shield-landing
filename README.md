@@ -116,7 +116,7 @@ Configure your DNS and hosting:
 
 1. **Main site**: `splshield.com` → This landing page
 2. **Scanner app**: `app.splshield.com` → SPL Shield Scanner
-3. **Exchange**: `ex.splshield.com` → TDL Token Exchange
+3. **Presale portal**: `presale.splshield.com` → TDL Presale Access
 
 ### Build & Deploy
 ```bash
@@ -131,7 +131,7 @@ npm run build
 Create `.env` file for any environment variables:
 ```env
 VITE_APP_SCANNER_URL=https://app.splshield.com
-VITE_APP_EXCHANGE_URL=https://ex.splshield.com
+VITE_APP_EXCHANGE_URL=https://presale.splshield.com
 VITE_APP_API_URL=https://api.splshield.com
 ```
 
@@ -170,7 +170,7 @@ colors: {
 ### External Links
 Update redirect URLs in components:
 - Scanner app: `https://app.splshield.com`
-- TDL exchange: `https://ex.splshield.com`
+- TDL presale: `https://presale.splshield.com`
 
 ## 🐛 Troubleshooting
 

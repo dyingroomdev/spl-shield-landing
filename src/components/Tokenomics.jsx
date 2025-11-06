@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { 
   DollarSign, 
   Target, 
@@ -10,19 +10,32 @@ import {
   Megaphone,
   ArrowRight
 } from 'lucide-react';
+import { EXCHANGE_URL } from '../config/appLinks';
 
-const TOTAL_SUPPLY = 1_000_000_000;
+const TOTAL_SUPPLY = 10_000_000_000;
 const PRESALE_TARGET = 500000;
-const PRESALE_PRICE = 0.002;
-const LISTING_PRICE = 0.005;
-const PRESALE_START_ISO = '2024-10-23T00:00:00Z';
+const PRESALE_RATE_SOL = 0.1;
+const PRESALE_RATE_TDL = 75018.75;
+const LISTING_RATE_SOL = 0.2;
+const LISTING_RATE_TDL = 75018.75;
+
+const getPresaleDeadline = () => {
+  const now = new Date();
+  const currentYearTarget = Date.UTC(now.getUTCFullYear(), 0, 6, 18, 0, 0);
+
+  if (now.getTime() >= currentYearTarget) {
+    return Date.UTC(now.getUTCFullYear() + 1, 0, 6, 18, 0, 0);
+  }
+
+  return currentYearTarget;
+};
 
 const Tokenomics = () => {
-  const presaleStartDate = new Date(PRESALE_START_ISO);
+  const presaleDeadline = useMemo(() => getPresaleDeadline(), []);
+  const presaleDeadlineDate = useMemo(() => new Date(presaleDeadline), [presaleDeadline]);
 
-  const calculateCountdown = () => {
-    const now = new Date();
-    const diff = presaleStartDate.getTime() - now.getTime();
+  const calculateCountdown = useCallback(() => {
+    const diff = presaleDeadline - Date.now();
 
     if (diff <= 0) {
       return { active: false, days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -34,21 +47,23 @@ const Tokenomics = () => {
     const seconds = Math.floor((diff / 1000) % 60);
 
     return { active: true, days, hours, minutes, seconds };
-  };
+  }, [presaleDeadline]);
 
-  const [countdown, setCountdown] = useState(calculateCountdown());
+  const [countdown, setCountdown] = useState(() => calculateCountdown());
 
   const handlePresaleClick = () => {
-    window.open('https://t.me/splshield', '_blank', 'noopener,noreferrer');
+    window.open(EXCHANGE_URL, '_blank', 'noopener,noreferrer');
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const updateCountdown = () => {
       setCountdown(calculateCountdown());
-    }, 1000);
-
+    };
+    
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [calculateCountdown]);
 
   // Tokenomics data
   const tokenomicsData = [
@@ -59,7 +74,7 @@ const Tokenomics = () => {
       lightColor: 'bg-tdl-purple-100',
       darkColor: 'bg-tdl-purple-900',
       icon: Users,
-      vesting: '12-month linear unlock, no cliff, starting at DEX listing'
+      vesting: '12-mo linear unlock • Early supporters'
     },
     {
       name: 'Liquidity & CEX Listings',
@@ -68,7 +83,7 @@ const Tokenomics = () => {
       lightColor: 'bg-blue-100',
       darkColor: 'bg-blue-900',
       icon: TrendingUp,
-      vesting: 'Locked liquidity at launch; vesting aligns with exchange partnerships and depth targets'
+      vesting: '12-mo lock • Market stabilization'
     },
     {
       name: 'Team & Development',
@@ -77,7 +92,7 @@ const Tokenomics = () => {
       lightColor: 'bg-tdl-orange-100',
       darkColor: 'bg-tdl-orange-900',
       icon: Users,
-      vesting: '24-month linear vesting'
+      vesting: '12-mo vesting • Long-term sustainability'
     },
     {
       name: 'Staking & Rewards',
@@ -86,7 +101,7 @@ const Tokenomics = () => {
       lightColor: 'bg-green-100',
       darkColor: 'bg-green-900',
       icon: Award,
-      vesting: 'Distributed over 48 months to incentivize long-term staking and participation'
+      vesting: '48-mo linear • Ecosystem incentives'
     },
     {
       name: 'Marketing & Partnerships',
@@ -95,7 +110,7 @@ const Tokenomics = () => {
       lightColor: 'bg-yellow-100',
       darkColor: 'bg-yellow-900',
       icon: Megaphone,
-      vesting: 'Released per strategic milestones and partnerships'
+      vesting: '12-mo rollout • Brand growth'
     },
     {
       name: 'Treasury & Ecosystem Growth',
@@ -104,15 +119,25 @@ const Tokenomics = () => {
       lightColor: 'bg-teal-100',
       darkColor: 'bg-teal-900',
       icon: Coins,
-      vesting: 'Reserved for ecosystem expansion, grants, and long-term sustainability'
+      vesting: 'DAO-managed • Future R&D'
     }
   ];
 
   const presaleDetails = [
-    { label: 'Presale Price', value: `$${PRESALE_PRICE.toFixed(3)}`, icon: DollarSign, highlight: true },
-    { label: 'Listing Price', value: `$${LISTING_PRICE.toFixed(3)}`, icon: TrendingUp, highlight: false },
+    { 
+      label: 'Presale Rate', 
+      value: `${PRESALE_RATE_SOL} SOL = ${PRESALE_RATE_TDL.toLocaleString(undefined, { maximumFractionDigits: 2 })} TDL`, 
+      icon: DollarSign, 
+      highlight: true 
+    },
+    { 
+      label: 'Listing Rate', 
+      value: `${LISTING_RATE_SOL} SOL = ${LISTING_RATE_TDL.toLocaleString(undefined, { maximumFractionDigits: 2 })} TDL`, 
+      icon: TrendingUp, 
+      highlight: false 
+    },
     { label: 'Raise Target', value: `$${PRESALE_TARGET.toLocaleString()}`, icon: Target, highlight: false },
-    { label: 'Total Supply', value: TOTAL_SUPPLY.toLocaleString(), icon: Coins, highlight: false }
+    { label: 'Total Supply', value: `${TOTAL_SUPPLY.toLocaleString()} TDL`, icon: Coins, highlight: false }
   ];
 
   // Calculate cumulative percentages for donut chart
@@ -275,8 +300,8 @@ const Tokenomics = () => {
 
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
                   {countdown.active
-                    ? 'Presale begins on October 23, 2024 at 00:00 UTC. Reserve your allocation now.'
-                    : 'Presale is live – secure your allocation while supplies last.'}
+                    ? `Presale ends on January 6, ${presaleDeadlineDate.getUTCFullYear()} at 18:00 UTC. Secure your allocation before the countdown hits zero.`
+                    : 'Presale has concluded. Stay tuned for the next phase of SPL Shield.'}
                 </p>
 
                 <div className="space-y-4 mb-8">
@@ -314,11 +339,11 @@ const Tokenomics = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-green-700 dark:text-green-300 font-medium">Potential ROI at Launch</span>
                     <span className="text-green-600 dark:text-green-400 font-bold text-xl">
-                      +{Math.round(((LISTING_PRICE - PRESALE_PRICE) / PRESALE_PRICE) * 100)}%
+                      +{Math.round(((LISTING_RATE_SOL - PRESALE_RATE_SOL) / PRESALE_RATE_SOL) * 100)}%
                     </span>
                   </div>
                   <div className="text-sm text-green-600 dark:text-green-400 mt-1">
-                    Based on listing price vs presale price
+                    Based on listing rate vs presale rate
                   </div>
                 </div>
 
@@ -328,13 +353,13 @@ const Tokenomics = () => {
                   type="button"
                   onClick={handlePresaleClick}
                 >
-                  <span>{countdown.active ? 'Join Presale Waitlist' : 'Enter Presale Portal'}</span>
+                  <span>Enter Presale Portal</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
 
                 <div className="text-center mt-4">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Presale allocation: 25% of supply • Target raise ${PRESALE_TARGET.toLocaleString()}
+                    Presale allocation: 25% of supply • Rate {PRESALE_RATE_SOL} SOL = {PRESALE_RATE_TDL.toLocaleString(undefined, { maximumFractionDigits: 2 })} TDL
                   </span>
                 </div>
               </div>

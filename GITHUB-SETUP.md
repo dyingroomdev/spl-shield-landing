@@ -81,8 +81,12 @@ cat > .env.production << 'EOF'
 # SPL Shield Production Environment
 VITE_SITE_URL=https://your-domain.com
 VITE_APP_NAME=SPL Shield
+VITE_APP_SCANNER_URL=https://app.splshield.com
+VITE_APP_EXCHANGE_URL=https://presale.splshield.com
+VITE_APP_API_URL=https://api.splshield.com
+# Legacy fallbacks (optional)
 VITE_SCANNER_URL=https://app.splshield.com
-VITE_EXCHANGE_URL=https://ex.splshield.com
+VITE_EXCHANGE_URL=https://presale.splshield.com
 VITE_ENABLE_ANALYTICS=true
 EOF
 ```
