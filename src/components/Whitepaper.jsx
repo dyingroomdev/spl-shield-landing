@@ -194,7 +194,7 @@ const Whitepaper = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => openExternal('https://t.me/splshield')}
+                onClick={() => openExternal('https://t.me/SPLShieldOfficial')}
                 className="btn-primary flex items-center space-x-2"
               >
                 <Users className="w-5 h-5" />

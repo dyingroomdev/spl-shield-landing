@@ -82,7 +82,7 @@ const SEO = ({
             "https://x.com/splshield",
             "https://www.facebook.com/splshield",
             "https://www.instagram.com/splshield",
-            "https://t.me/splshield"
+            "https://t.me/SPLShieldOfficial"
           ],
           "contactPoint": {
             "@type": "ContactPoint",

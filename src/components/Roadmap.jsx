@@ -340,7 +340,7 @@ const Roadmap = () => {
                   Follow our progress and get notified about major milestones.
                 </p>
                 <button
-                  onClick={() => handleExternalRedirect('https://t.me/splshield')}
+                  onClick={() => handleExternalRedirect('https://t.me/SPLShieldOfficial')}
                   className="btn-primary w-full flex items-center justify-center space-x-2"
                 >
                   <span>Join Community</span>

@@ -55,9 +55,9 @@ const Contact = () => {
       icon: Send,
       title: 'Telegram Community',
       description: 'Chat with our moderators in real-time',
-      contact: 't.me/splshield',
+      contact: 't.me/SPLShieldOfficial',
       action: 'Join Telegram',
-      href: 'https://t.me/splshield'
+      href: 'https://t.me/SPLShieldOfficial'
     },
     {
       icon: Twitter,
@@ -73,7 +73,7 @@ const Contact = () => {
     { icon: Twitter, name: 'X (Twitter)', url: 'https://x.com/splshield' },
     { icon: Facebook, name: 'Facebook', url: 'https://www.facebook.com/splshield' },
     { icon: Instagram, name: 'Instagram', url: 'https://www.instagram.com/splshield' },
-    { icon: Send, name: 'Telegram', url: 'https://t.me/splshield' }
+    { icon: Send, name: 'Telegram', url: 'https://t.me/SPLShieldOfficial' }
   ];
 
   const handleExternalLink = (href) => {

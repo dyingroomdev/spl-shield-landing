@@ -43,7 +43,7 @@ const Footer = () => {
     { icon: Twitter, url: 'https://x.com/splshield', name: 'X (Twitter)' },
     { icon: Facebook, url: 'https://www.facebook.com/splshield', name: 'Facebook' },
     { icon: Instagram, url: 'https://www.instagram.com/splshield', name: 'Instagram' },
-    { icon: Send, url: 'https://t.me/splshield', name: 'Telegram' }
+    { icon: Send, url: 'https://t.me/SPLShieldOfficial', name: 'Telegram' }
   ];
 
   const handleLinkClick = (url, external) => {
