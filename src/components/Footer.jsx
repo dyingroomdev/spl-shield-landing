@@ -1,7 +1,8 @@
 import React from 'react';
-import { ExternalLink, Twitter, Heart, Facebook, Instagram, Send } from 'lucide-react';
+import { ExternalLink, Twitter, Heart, Facebook, Instagram, Send, MessageCircle } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SCANNER_URL, EXCHANGE_URL } from '../config/appLinks';
+import { TELEGRAM_URL, DISCORD_URL } from '../config/communityLinks';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -43,7 +44,8 @@ const Footer = () => {
     { icon: Twitter, url: 'https://x.com/splshield', name: 'X (Twitter)' },
     { icon: Facebook, url: 'https://www.facebook.com/splshield', name: 'Facebook' },
     { icon: Instagram, url: 'https://www.instagram.com/splshield', name: 'Instagram' },
-    { icon: Send, url: 'https://t.me/SPLShieldOfficial', name: 'Telegram' }
+    { icon: MessageCircle, url: DISCORD_URL, name: 'Discord' },
+    { icon: Send, url: TELEGRAM_URL, name: 'Telegram' }
   ];
 
   const handleLinkClick = (url, external) => {

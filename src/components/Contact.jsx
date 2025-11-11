@@ -6,8 +6,10 @@ import {
   Facebook,
   Instagram,
   ExternalLink,
-  CheckCircle
+  CheckCircle,
+  MessageCircle
 } from 'lucide-react';
+import { TELEGRAM_URL, DISCORD_URL } from '../config/communityLinks';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -42,6 +44,8 @@ const Contact = () => {
     }, 2000);
   };
 
+  const formatCommunityHandle = (url) => url.replace(/^https?:\/\//, '');
+
   const contactMethods = [
     {
       icon: Mail,
@@ -55,9 +59,17 @@ const Contact = () => {
       icon: Send,
       title: 'Telegram Community',
       description: 'Chat with our moderators in real-time',
-      contact: 't.me/SPLShieldOfficial',
+      contact: formatCommunityHandle(TELEGRAM_URL),
       action: 'Join Telegram',
-      href: 'https://t.me/SPLShieldOfficial'
+      href: TELEGRAM_URL
+    },
+    {
+      icon: MessageCircle,
+      title: 'Discord Server',
+      description: 'Collaborate with builders & get product updates',
+      contact: formatCommunityHandle(DISCORD_URL),
+      action: 'Join Discord',
+      href: DISCORD_URL
     },
     {
       icon: Twitter,
@@ -73,7 +85,8 @@ const Contact = () => {
     { icon: Twitter, name: 'X (Twitter)', url: 'https://x.com/splshield' },
     { icon: Facebook, name: 'Facebook', url: 'https://www.facebook.com/splshield' },
     { icon: Instagram, name: 'Instagram', url: 'https://www.instagram.com/splshield' },
-    { icon: Send, name: 'Telegram', url: 'https://t.me/SPLShieldOfficial' }
+    { icon: MessageCircle, name: 'Discord', url: DISCORD_URL },
+    { icon: Send, name: 'Telegram', url: TELEGRAM_URL }
   ];
 
   const handleExternalLink = (href) => {

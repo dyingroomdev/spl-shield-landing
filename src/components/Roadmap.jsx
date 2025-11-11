@@ -12,6 +12,7 @@ import {
   Users,
   BarChart3
 } from 'lucide-react';
+import { TELEGRAM_URL, DISCORD_URL } from '../config/communityLinks';
 
 const Roadmap = () => {
   const [activePhase, setActivePhase] = useState(0);
@@ -339,13 +340,22 @@ const Roadmap = () => {
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                   Follow our progress and get notified about major milestones.
                 </p>
-                <button
-                  onClick={() => handleExternalRedirect('https://t.me/SPLShieldOfficial')}
-                  className="btn-primary w-full flex items-center justify-center space-x-2"
-                >
-                  <span>Join Community</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleExternalRedirect(TELEGRAM_URL)}
+                    className="btn-primary w-full flex items-center justify-center space-x-2"
+                  >
+                    <span>Join Telegram</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleExternalRedirect(DISCORD_URL)}
+                    className="btn-secondary w-full flex items-center justify-center space-x-2"
+                  >
+                    <span>Join Discord</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

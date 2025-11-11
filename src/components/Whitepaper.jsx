@@ -10,8 +10,10 @@ import {
   Twitter,
   ExternalLink,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  MessageCircle
 } from 'lucide-react';
+import { TELEGRAM_URL, DISCORD_URL } from '../config/communityLinks';
 
 const Whitepaper = () => {
   const whitepaperSections = [
@@ -194,11 +196,19 @@ const Whitepaper = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => openExternal('https://t.me/SPLShieldOfficial')}
+                onClick={() => openExternal(TELEGRAM_URL)}
                 className="btn-primary flex items-center space-x-2"
               >
                 <Users className="w-5 h-5" />
-                <span>Join Community</span>
+                <span>Join Telegram</span>
+                <ExternalLink className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => openExternal(DISCORD_URL)}
+                className="btn-secondary flex items-center space-x-2"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span>Join Discord</span>
                 <ExternalLink className="w-4 h-4" />
               </button>
               <button

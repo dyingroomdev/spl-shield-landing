@@ -212,6 +212,7 @@ MIT License - see LICENSE file for details
 - **Facebook**: https://www.facebook.com/splshield
 - **Instagram**: https://www.instagram.com/splshield
 - **Telegram**: https://t.me/SPLShieldOfficial
+- **Discord**: https://discord.gg/HWyURyg6uH
 
 ## 🎉 What's Next?
 
