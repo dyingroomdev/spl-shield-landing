@@ -16,7 +16,7 @@ const TOTAL_SUPPLY = 10_000_000_000;
 const PRESALE_TARGET = 500000;
 const PRESALE_RATE_SOL = 0.1;
 const PRESALE_RATE_TDL = 75018.75;
-const LISTING_RATE_SOL = 0.2;
+const LISTING_RATE_SOL = 0.3;
 const LISTING_RATE_TDL = 75018.75;
 
 const getPresaleDeadline = () => {

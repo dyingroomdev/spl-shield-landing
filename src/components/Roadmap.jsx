@@ -81,20 +81,20 @@ const Roadmap = () => {
     {
       id: 'q3-2026',
       quarter: 'Q3 2026',
-      title: 'Multi-chain & Mobile',
+      title: 'Mobile & Solana Enhancements',
       emoji: '📱',
       icon: Smartphone,
       status: 'upcoming',
       gradient: 'from-purple-500 to-indigo-500',
       lightBg: 'bg-purple-50 dark:bg-purple-900/20',
       features: [
-        'Multi-chain Support',
         'Mobile Application',
-        'Cross-chain Security',
+        'Solana Native Integrations',
+        'Wallet Security Alerts',
         'Mobile Notifications',
         'Global Expansion'
       ],
-      description: 'Expansion to multiple blockchains and launch of mobile application.'
+      description: 'Deepening Solana-first capabilities with a companion mobile experience and realtime alerts.'
     }
   ];
 
@@ -324,8 +324,8 @@ const Roadmap = () => {
                 </div>
                 <div className="card p-4 text-center">
                   <Globe className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Multi</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Chain</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Solana</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Native</div>
                 </div>
                 <div className="card p-4 text-center">
                   <BarChart3 className="w-8 h-8 text-purple-500 mx-auto mb-2" />
