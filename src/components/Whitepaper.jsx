@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { TELEGRAM_URL, DISCORD_URL } from '../config/communityLinks';
 
+const WHITEPAPER_URL = 'https://docs.splshield.com/whitepaper';
+
 const Whitepaper = () => {
   const whitepaperSections = [
     {
@@ -44,24 +46,12 @@ const Whitepaper = () => {
   ];
 
   const downloadFormats = [
-    { format: 'PDF', size: '2.4 MB', icon: FileText, path: '/assets/whitepaper_v101.pdf' },
-    { format: 'EPUB', size: '1.8 MB', icon: BookOpen, path: '/assets/whitepaper_v101.epub' },
+    { format: 'PDF', size: '2.4 MB', icon: FileText },
+    { format: 'EPUB', size: '1.8 MB', icon: BookOpen },
   ];
 
   const openExternal = (url) => {
     window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleDownload = (format) => {
-    const selected = downloadFormats.find((item) => item.format === format);
-    if (selected) {
-      const link = document.createElement('a');
-      link.href = selected.path;
-      link.download = selected.path.split('/').pop();
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
   };
 
   return (
@@ -83,7 +73,7 @@ const Whitepaper = () => {
             {downloadFormats.map((download) => (
               <button
                 key={download.format}
-                onClick={() => handleDownload(download.format)}
+                onClick={() => openExternal(WHITEPAPER_URL)}
                 className="btn-primary flex items-center space-x-3 group"
               >
                 <download.icon className="w-5 h-5" />
@@ -93,7 +83,7 @@ const Whitepaper = () => {
               </button>
             ))}
             <button
-              onClick={() => openExternal('https://docs.splshield.com')}
+              onClick={() => openExternal(WHITEPAPER_URL)}
               className="btn-secondary flex items-center space-x-2"
             >
               <span>Read Online</span>
